@@ -1,0 +1,1 @@
+A Python script using construct (http://construct.wikispaces.com/) to parse the code directory in a Mach-O file.  In the future it might parse the whole Mach-O that way.
