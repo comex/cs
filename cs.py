@@ -1,6 +1,7 @@
 from construct import *
 import sys, os, re
 import plistlib
+from optparse import OptionParser
 
 class PlistAdapter(Adapter):
     def _encode(self, obj, context):
@@ -9,18 +10,20 @@ class PlistAdapter(Adapter):
         return plistlib.readPlistFromString(obj)
 
 # talk about overdesign.
-
 # magic is in the blob struct
 
 Expr = LazyBound("expr", lambda: Expr_)
 Blob = LazyBound("blob", lambda: Blob_)
 
+Hashes = StrictRepeater(lambda ctx: ctx['nSpecialSlots'] + ctx['nCodeSlots'], Bytes("hash", lambda ctx: ctx['hashSize']))
+
 CodeDirectory = Struct("CodeDirectory",
+    Anchor("cd_start"),
     UBInt32("version"),
     UBInt32("flags"),
     UBInt32("hashOffset"),
     UBInt32("identOffset"),
-    UBInt32("nSpecialSlots"),
+    UBInt32("nSpecialSlots"), # known special slots: -5 hashes the fade7171 blob
     UBInt32("nCodeSlots"),
     UBInt32("codeLimit"),
     UBInt8("hashSize"),
@@ -29,6 +32,7 @@ CodeDirectory = Struct("CodeDirectory",
     UBInt8("pageSize"),
     UBInt32("spare2"),
     If(lambda ctx: ctx['version'] >= 0x20100, UBInt32("scatterOffset")),
+    If(lambda ctx: options.hashes, Pointer(lambda ctx: ctx['cd_start'] - 8 + ctx['hashOffset'] - ctx['hashSize']*ctx['nSpecialSlots'], Hashes))
 )
 
 Data = Struct("Data",
@@ -112,7 +116,6 @@ BlobWrapper = Struct("BlobWrapper",
 )
 
 Blob_ = Struct("Blob",
-    Anchor("blob_start"),
     Enum(UBInt32("magic"),
         CSMAGIC_REQUIREMENT = 0xfade0c00,
         CSMAGIC_REQUIREMENTS = 0xfade0c01,
@@ -144,11 +147,16 @@ SuperBlob = Struct("SuperBlob",
     StrictRepeater(lambda ctx: ctx['count'], BlobIndex),
 )
 
+parser = OptionParser()
+parser.add_option('-H', '--hashes', dest='hashes', action='store_true', default=False, help='print the actual hashes')
+options, args = parser.parse_args()
+filename = args[0]
+
 # not going to bother to use construct for mach-o right now
-for blob in os.popen('otool -lvv "%s" | grep -A 3 LC_CODE_SIGNATURE' % sys.argv[1]).read().split('\n--\n'):
+for blob in os.popen('otool -lvv "%s" | grep -A 3 LC_CODE_SIGNATURE' % filename).read().split('\n--\n'):
     dataoff = int(re.search('dataoff\s*([0-9]+)', blob).group(1))
     datasize = int(re.search('datasize\s*([0-9]+)', blob).group(1))
-    f = open(sys.argv[1])
+    f = open(filename)
     f.seek(dataoff)
     data = f.read(datasize)
 
