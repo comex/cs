@@ -31,17 +31,17 @@ Test = Struct('Test',
                 UBInt32('two')
             ),
             #Aligned(BData(probe), 16),
-            BData(lambda ctx: ctx['_']['_block3'], align=16, pattern='12'),
+            BData(lambda ctx: ctx['_']['_block3'], align=48, pattern='12'),
         ),
     ),
     BData(lambda ctx: ctx['_block1']),
     BData(lambda ctx: ctx['_block2']),
 )
 
-result = Test.parse(struct.pack('>IIIIIIIIII', 28, 4, 32, 8, 36, 4, 42, 1, 42, 2))
-print result
+#result = Test.parse(struct.pack('>IIIIIIIIII', 28, 4, 32, 8, 36, 4, 42, 1, 42, 2))
+#print result
 
-result = Container(one=2, data=Container(two=4))
+result = Container(one=0x11111111, data=Container(two=0x22222222))
 Test.build_stream(result, fakestream())
 packed = Test.build(result)
-print repr(packed)
+sys.stdout.write(packed)

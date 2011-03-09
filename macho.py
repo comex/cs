@@ -1,15 +1,6 @@
 from block import *
 from macho_cs import Blob
-
-class hexint(int):
-    def __repr__(self):
-        return hex(self)
-
-class HexAdapter(Adapter):
-    def _encode(self, obj, context):
-        return obj
-    def _decode(self, obj, context):
-        return hexint(obj)
+from stuff import HexAdapter
 
 UInt32 = ULInt32
 
