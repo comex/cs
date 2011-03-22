@@ -18,6 +18,7 @@ class Nobody(object):
         self.name = name
         self.pdata = {}
         self.ddata = None
+        self.offsetof = {}
         # If the same BPointer is reused with the same object, we want to repeat the data if it's in an array, but not if this is another invocation of build*.
         # We must act properly with a regular fakestream, but not a very fake stream.
         self.stream = None
@@ -61,6 +62,7 @@ class BPointer(Pointer):
         if nobody.stream is not stream:
             nobody.pdata = {}
             nobody.stream = stream
+            nobody.offsetof = {}
         nobody.pdata[self] = (self.subcon, obj, context)
 
 class BData(Construct):
@@ -85,10 +87,11 @@ class BData(Construct):
             stream.write(padding)
 
         for (subcon, obj, context) in nobody.pdata.itervalues():
+            #nobody.offsetof[stream.tell() - offset
             subcon._build(obj, stream, context)
 
         size = stream.tell() - offset
-        nobody.ddata = (offset, size)
+        nobody.ddata = (offset, stream.tell() - offset)
 
     def _sizeof(self, context):
         nobody = self.nobodyfunc(context)
