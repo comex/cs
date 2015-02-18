@@ -138,13 +138,14 @@ Blob_ = Struct("Blob",
         _default_ = Pass,
     ),
     UBInt32("length"),
-    Switch("data", lambda ctx: ctx['magic'], {
+    Peek(Switch("data", lambda ctx: ctx['magic'], {
         'CSMAGIC_REQUIREMENT': Requirement,
         'CSMAGIC_REQUIREMENTS': Entitlements,
         'CSMAGIC_CODEDIRECTORY': CodeDirectory,
         'CSMAGIC_ENTITLEMENT': Entitlement,
         'CSMAGIC_BLOBWRAPPER': BlobWrapper,
         'CSMAGIC_EMBEDDED_SIGNATURE': SuperBlob,
-    }, default = Pass),
+    })),
+    OnDemand(Bytes('bytes', lambda ctx: ctx['length'] - 8)),
 )
 

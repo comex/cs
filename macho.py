@@ -42,8 +42,19 @@ LoadCommand = Struct("LoadCommand",
         LC_DYLD_INFO = 0x22,
         LC_DYLD_INFO_ONLY = 0x80000022,
         LC_LOAD_UPWARD_DYLIB = 0x80000023,
+        LC_VERSION_MIN_MACOSX = 0x24,
+        LC_VERSION_MIN_IPHONEOS = 0x25,
+        LC_FUNCTION_STARTS = 0x26,
+        LC_DYLD_ENVIRONMENT = 0x27,
+        LC_MAIN = 0x80000028,
+        LC_DATA_IN_CODE = 0x29,
+        LC_SOURCE_VERSION = 0x2a,
+        LC_DYLIB_CODE_SIGN_DRS = 0x2b,
+        LC_ENCRYPTION_INFO_64 = 0x2c,
+        LC_LINKER_OPTION = 0x2d,
+        LC_LINKER_OPTIMIZATION_HINT = 0x2e,
     ),
-                
+
     UInt32("cmdsize"),
     Peek(Switch("data", lambda ctx: ctx['cmd'], {
         'LC_SEGMENT': Struct('segment',
@@ -79,7 +90,6 @@ LoadCommand = Struct("LoadCommand",
     OnDemand(Bytes('bytes', lambda ctx: ctx['cmdsize'] - 8)),
     #Probe(),
 )
-    
 
 MachO = Struct("MachO",
     Anchor("macho_start"),
@@ -153,6 +163,7 @@ MachOOrFat = Struct("MachOOrFat",
     Peek(UInt32("magic")),
     Switch("data", lambda ctx: ctx['magic'], {
         0xfeedface: MachO,
+        0xfeedfacf: MachO,
         0xcafebabe: Fat,
         0xbebafeca: Fat,
     })

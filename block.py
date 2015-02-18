@@ -1,4 +1,5 @@
 from construct import *
+StrictRepeater = Array
 from stuff import OConst, call
 # note: structdefpatch.py is optional, but it allows everything but the actual pointer data to be omitted in the input
 # to make this nicer, block and offset/size names ought to start with _, so they are also omitted in the output
