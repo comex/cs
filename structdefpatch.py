@@ -44,7 +44,7 @@ Adapter._getdefault = Adapter_getdefault
 
 def ConstAdapter_getdefault(self, context):
     return None
-ConstAdapter._setdefault = ConstAdapter_getdefault
+ConstAdapter._getdefault = ConstAdapter_getdefault
 
 class Default(Subconstruct):
     def __init__(self, subcon, value):
