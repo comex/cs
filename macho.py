@@ -159,13 +159,14 @@ Fat = Struct("Fat",
     StrictRepeater(lambda ctx: ctx['nfat_arch'], FatArch),
 )
 
-MachOOrFat = Struct("MachOOrFat",
+InputFile = Struct("InputFile",
     Peek(UInt32("magic")),
     Switch("data", lambda ctx: ctx['magic'], {
         0xfeedface: MachO,
         0xfeedfacf: MachO,
         0xcafebabe: Fat,
         0xbebafeca: Fat,
+        0xc10cdefa: Blob,
     })
 )
 
